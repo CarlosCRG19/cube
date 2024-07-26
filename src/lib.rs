@@ -19,10 +19,33 @@ pub fn run() -> Result<()> {
 
     let mut timer = Timer::new();
     let mut should_quit = false;
+    let mut session = Session::new();
 
     while !should_quit {
-        terminal.draw(|frame| draw_ui(frame, &timer))?;
-        handle_events(&mut should_quit, &mut timer)?;
+        terminal.draw(|frame| draw_ui(frame, &timer, session.times().len()))?;
+
+        if event::poll(Duration::from_millis(16))? {
+            if let Event::Key(key) = event::read()? {
+                if key.kind == KeyEventKind::Press {
+                    match key.code {
+                        KeyCode::Char(' ') => {
+                            match &timer.state() {
+                                TimerState::Running { .. } => {
+                                    timer.pause();
+                                    session.save_time(timer.elapsed());
+                                }
+                                _ => {
+                                    timer.reset();
+                                    timer.start();
+                                }
+                            }
+                        }
+                        KeyCode::Char('q') => should_quit = true,
+                        _ => {}
+                    }
+                }
+            }
+        }
     }
 
     disable_raw_mode()?;
@@ -30,14 +53,15 @@ pub fn run() -> Result<()> {
     Ok(())
 }
 
-fn draw_ui(frame: &mut Frame, timer: &Timer) {
+fn draw_ui(frame: &mut Frame, timer: &Timer, n_times: usize) {
     let area = frame.size();
     let elapsed = timer.elapsed();
     let text = format!(
-        "Welcome to CUBE\nTime: {:02}:{:02}:{:02}",
+        "Welcome to CUBE\nTime: {:02}:{:02}:{:02}\nTotal times: {}",
         elapsed.as_secs() / 60,
         elapsed.as_secs() % 60,
         elapsed.subsec_millis(),
+        n_times
     );
     let paragraph = Paragraph::new(text)
         .style(Style::default().fg(Color::White).bg(Color::Blue));
@@ -45,26 +69,55 @@ fn draw_ui(frame: &mut Frame, timer: &Timer) {
     frame.render_widget(paragraph, area);
 }
 
-fn handle_events(should_quit: &mut bool, timer: &mut Timer) -> Result<()>  {
-    if event::poll(Duration::from_millis(16))? {
-        if let Event::Key(key) = event::read()? {
-            if key.kind == KeyEventKind::Press {
-                match key.code {
-                    KeyCode::Char(' ') => {
-                        match &timer.state() {
-                            TimerState::Running { .. } => timer.pause(),
-                            _ => {
-                                timer.reset();
-                                timer.start();
-                            }
-                        }
-                    }
-                    KeyCode::Char('q') => *should_quit = true,
-                    _ => {}
-                }
-            }
-        }
+struct Session {
+    times: Vec<Duration>,
+}
+
+impl Session {
+    fn new() -> Self {
+        Session { times: Vec::new() }
     }
 
-    Ok(())
+    fn from_times(times: Vec<Duration>) -> Self {
+        Session { times }
+    }
+
+    fn times(&self) -> &Vec<Duration> {
+        &self.times
+    }
+
+    fn save_time(&mut self, time: Duration) {
+        self.times.push(time);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test_new_session() {
+        let session = Session::new();
+        assert_eq!(session.times().len(), 0);
+    }
+
+    #[test]
+    fn test_session_from_times() {
+        let session = Session::from_times(vec![
+            Duration::from_millis(5440),
+            Duration::from_millis(7480),
+            Duration::from_millis(5400),
+        ]);
+        assert_eq!(session.times().len(), 3);
+    }
+
+    #[test]
+    fn test_save_time() {
+        let mut session = Session::new();
+        session.save_time(Duration::from_millis(5440));
+        session.save_time(Duration::from_millis(7480));
+        session.save_time(Duration::from_millis(5400));
+        assert_eq!(session.times().len(), 3);
+    }
 }

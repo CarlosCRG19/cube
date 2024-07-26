@@ -145,5 +145,4 @@ mod tests {
 
         assert!(timer.elapsed() > paused_time);
     }
-
 }
