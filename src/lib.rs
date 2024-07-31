@@ -1,4 +1,6 @@
 mod timer;
+mod math;
+
 
 use std::{io::{stdout, Result}, time::Duration};
 use ratatui::{
@@ -22,7 +24,7 @@ pub fn run() -> Result<()> {
     let mut session = Session::new();
 
     while !should_quit {
-        terminal.draw(|frame| draw_ui(frame, &timer, session.times().len()))?;
+        terminal.draw(|frame| draw_ui(frame, &timer, &session))?;
 
         if event::poll(Duration::from_millis(16))? {
             if let Event::Key(key) = event::read()? {
@@ -53,20 +55,24 @@ pub fn run() -> Result<()> {
     Ok(())
 }
 
-fn draw_ui(frame: &mut Frame, timer: &Timer, n_times: usize) {
+fn draw_ui(frame: &mut Frame, timer: &Timer, session: &Session) {
     let area = frame.size();
     let elapsed = timer.elapsed();
     let text = format!(
-        "Welcome to CUBE\nTime: {:02}:{:02}:{:02}\nTotal times: {}",
-        elapsed.as_secs() / 60,
-        elapsed.as_secs() % 60,
-        elapsed.subsec_millis(),
-        n_times
+        "Welcome to CUBE\nTime: {}\nTotal times: {}\navg: {} (σ = {})",
+        render_time(elapsed),
+        session.times().len(),
+        if let Some(avg) = math::avg(session.times()) { render_time(avg) } else { "DNF".to_string() },
+        if let Some(std) = math::std(session.times()) { render_time(std) } else { "-1".to_string() },
     );
     let paragraph = Paragraph::new(text)
         .style(Style::default().fg(Color::White).bg(Color::Blue));
 
     frame.render_widget(paragraph, area);
+}
+
+fn render_time(time: Duration) -> String {
+    format!("{:02}:{:02}:{02}", time.as_secs() / 60, time.as_secs() % 60, time.subsec_millis())
 }
 
 struct Session {
@@ -103,7 +109,7 @@ mod tests {
     }
 
     #[test]
-    fn test_session_from_times() {
+    fn test_new_session_from_times() {
         let session = Session::from_times(vec![
             Duration::from_millis(5440),
             Duration::from_millis(7480),
