@@ -1,5 +1,7 @@
 mod timer;
 mod math;
+mod session;
+mod scrambles;
 
 
 use std::{io::{stdout, Result}, time::Duration};
@@ -11,6 +13,8 @@ use ratatui::{
     }, prelude::CrosstermBackend, style::{Color, Style}, widgets::Paragraph, Frame, Terminal
 };
 use timer::{Timer, TimerState};
+use session::Session;
+use scrambles::{Puzzle, Scrambler};
 
 pub fn run() -> Result<()> {
     stdout().execute(EnterAlternateScreen)?;
@@ -22,9 +26,10 @@ pub fn run() -> Result<()> {
     let mut timer = Timer::new();
     let mut should_quit = false;
     let mut session = Session::new();
+    let mut scramble = Scrambler::new_scramble(&Puzzle::Cube3x3);
 
     while !should_quit {
-        terminal.draw(|frame| draw_ui(frame, &timer, &session))?;
+        terminal.draw(|frame| draw_ui(frame, &timer, &session, &scramble))?;
 
         if event::poll(Duration::from_millis(16))? {
             if let Event::Key(key) = event::read()? {
@@ -35,6 +40,7 @@ pub fn run() -> Result<()> {
                                 TimerState::Running { .. } => {
                                     timer.pause();
                                     session.save_time(timer.elapsed());
+                                    scramble = Scrambler::new_scramble(&Puzzle::Cube3x3);
                                 }
                                 _ => {
                                     timer.reset();
@@ -55,11 +61,12 @@ pub fn run() -> Result<()> {
     Ok(())
 }
 
-fn draw_ui(frame: &mut Frame, timer: &Timer, session: &Session) {
+fn draw_ui(frame: &mut Frame, timer: &Timer, session: &Session, scramble: &str) {
     let area = frame.size();
     let elapsed = timer.elapsed();
     let text = format!(
-        "Welcome to CUBE\nTime: {}\nTotal times: {}\navg: {} (σ = {})",
+        "Welcome to CUBE\nScramble: {}\nTime: {}\nTotal times: {}\navg: {} (σ = {})",
+        scramble,
         render_time(elapsed),
         session.times().len(),
         if let Some(avg) = math::avg(session.times()) { render_time(avg) } else { "DNF".to_string() },
@@ -73,57 +80,4 @@ fn draw_ui(frame: &mut Frame, timer: &Timer, session: &Session) {
 
 fn render_time(time: Duration) -> String {
     format!("{:02}:{:02}:{02}", time.as_secs() / 60, time.as_secs() % 60, time.subsec_millis())
-}
-
-struct Session {
-    times: Vec<Duration>,
-}
-
-impl Session {
-    fn new() -> Self {
-        Session { times: Vec::new() }
-    }
-
-    fn from_times(times: Vec<Duration>) -> Self {
-        Session { times }
-    }
-
-    fn times(&self) -> &Vec<Duration> {
-        &self.times
-    }
-
-    fn save_time(&mut self, time: Duration) {
-        self.times.push(time);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::time::Duration;
-
-    #[test]
-    fn test_new_session() {
-        let session = Session::new();
-        assert_eq!(session.times().len(), 0);
-    }
-
-    #[test]
-    fn test_new_session_from_times() {
-        let session = Session::from_times(vec![
-            Duration::from_millis(5440),
-            Duration::from_millis(7480),
-            Duration::from_millis(5400),
-        ]);
-        assert_eq!(session.times().len(), 3);
-    }
-
-    #[test]
-    fn test_save_time() {
-        let mut session = Session::new();
-        session.save_time(Duration::from_millis(5440));
-        session.save_time(Duration::from_millis(7480));
-        session.save_time(Duration::from_millis(5400));
-        assert_eq!(session.times().len(), 3);
-    }
 }
