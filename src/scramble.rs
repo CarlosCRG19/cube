@@ -1,12 +1,13 @@
 use rand::Rng;
 
+#[derive(Debug, Clone)]
 pub enum Puzzle {
     Cube3x3
 }
 
 pub struct Scrambler {}
 impl Scrambler {
-    pub fn new_scramble(p: &Puzzle) -> String {
+    pub fn new_scramble(p: Puzzle) -> String {
         match p {
             Puzzle::Cube3x3 => Self::scramble_3x3()
         }
