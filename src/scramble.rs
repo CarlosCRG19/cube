@@ -44,14 +44,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_scramble_3x3_returns_a_20_move_scramble() {
+    fn scramble_3x3_returns_a_20_move_scramble() {
         let scramble = Scrambler::scramble_3x3();
         let moves: Vec<_> = scramble.split_whitespace().collect();
         assert_eq!(moves.len(), 20);
     }
 
     #[test]
-    fn test_no_consecutive_repeated_moves() {
+    fn no_consecutive_repeated_moves() {
         let scramble = Scrambler::scramble_3x3();
         let moves: Vec<_> = scramble.split_ascii_whitespace().collect();
         for window in moves.windows(2) {

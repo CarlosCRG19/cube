@@ -58,7 +58,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_valid_solve() {
+    fn valid_solve() {
         let solve = Solve::build(
             "R U R' U'".to_owned(),
             Some(Duration::from_secs(10)),
@@ -68,7 +68,7 @@ mod tests {
     }
 
     #[test]
-    fn test_valid_solve_with_penalty() {
+    fn valid_solve_with_penalty() {
         let solve = Solve::build(
             "R U R' U'".to_owned(),
             Some(Duration::from_secs(10)),
@@ -78,13 +78,13 @@ mod tests {
     }
 
     #[test]
-    fn test_valid_solve_dnf() {
+    fn valid_solve_dnf() {
         let solve = Solve::build("R U R' U'".to_string(), None, Some(Penalty::DNF));
         assert!(solve.is_ok());
     }
 
     #[test]
-    fn test_invalid_solve_time_with_dnf() {
+    fn invalid_solve_time_with_dnf() {
         let solve = Solve::build(
             "R U R' U".to_owned(),
             Some(Duration::from_secs(10)),
@@ -94,7 +94,7 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_solve_no_time_with_plus2() {
+    fn invalid_solve_no_time_with_plus2() {
         let solve = Solve::build(
             "R U R' U".to_owned(),
             None,

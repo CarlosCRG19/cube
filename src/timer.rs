@@ -62,20 +62,20 @@ mod tests {
     }
 
     #[test]
-    fn test_new_timer() {
+    fn new_timer() {
         let timer = Timer::new();
         assert!(matches!(timer.state, TimerState::Idle));
     }
 
     #[test]
-    fn test_start_from_idle() {
+    fn start_from_idle() {
         let mut timer = Timer::new();
         timer.start();
         assert!(matches!(timer.state, TimerState::Running { .. }))
     }
 
     #[test]
-    fn test_start_from_paused() {
+    fn start_from_paused() {
         let mut timer = Timer::new();
         timer.start();
         sleep_some_time();
@@ -91,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn test_elapsed() {
+    fn elapsed() {
         let mut timer = Timer::new();
         timer.start();
         sleep_some_time();
@@ -102,7 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pause() {
+    fn pause() {
         let mut timer = Timer::new();
         timer.start();
         sleep_some_time();
@@ -115,7 +115,7 @@ mod tests {
     }
 
     #[test]
-    fn test_reset() {
+    fn reset() {
         let mut timer = Timer::new();
         timer.start();
         sleep_some_time();
@@ -126,7 +126,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_start_reset_cycles() {
+    fn multiple_start_reset_cycles() {
         let mut timer = Timer::new();
 
         timer.start();

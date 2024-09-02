@@ -29,13 +29,13 @@ mod tests {
     use std::time::Duration;
 
     #[test]
-    fn test_new_session() {
+    fn new_session() {
         let session = Session::new();
         assert_eq!(session.solves().len(), 0);
     }
 
     #[test]
-    fn test_new_session_from_solves() {
+    fn new_session_from_solves() {
         let scramble = Scrambler::new_scramble(Puzzle::Cube3x3);
         let session = Session::from_solves(vec![
             Solve::build(scramble.clone(), Some(Duration::from_millis(5440)), None).unwrap(),
@@ -47,7 +47,7 @@ mod tests {
     }
 
     #[test]
-    fn test_save_solve() {
+    fn save_solve() {
         let mut session = Session::new();
         let scramble = Scrambler::new_scramble(Puzzle::Cube3x3);
 

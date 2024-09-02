@@ -29,13 +29,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_avg_with_empty_vector() {
+    fn avg_with_empty_vector() {
         let empty_vec = vec![];
         assert_eq!(avg(&empty_vec), None);
     }
 
     #[test]
-    fn test_avg_with_multiple_elements() {
+    fn avg_with_multiple_elements() {
         let times = vec![
             Duration::from_millis(10000),
             Duration::from_millis(20000),
@@ -55,13 +55,13 @@ mod tests {
     }
 
     #[test]
-    fn test_std_with_empty_vector() {
+    fn std_with_empty_vector() {
         let empty_vec = vec![];
         assert_eq!(std(&empty_vec), None);
     }
 
     #[test]
-    fn test_std_with_multiple_elements() {
+    fn std_with_multiple_elements() {
         let times = vec![
             Duration::from_millis(10000),
             Duration::from_millis(20000),
