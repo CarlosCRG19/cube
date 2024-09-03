@@ -1,11 +1,13 @@
 use std::time::{Duration, Instant};
 
+#[derive(Debug)]
 pub enum TimerState {
     Idle,
     Paused { elapsed: Duration },
     Running { start: Instant }
 }
 
+#[derive(Debug)]
 pub struct Timer {
     state: TimerState
 }
@@ -45,7 +47,6 @@ impl Timer {
             TimerState::Running { start } => start.elapsed(),
             TimerState::Paused { elapsed } => elapsed,
         }
-        
     }
 }
 
