@@ -1,14 +1,16 @@
 mod app;
-mod timer;
+mod error;
 mod math;
-mod session;
 mod scramble;
+mod session;
 mod solve;
+mod timer;
 mod ui;
 
 use crate::app::App;
 
-use std::{io::{self, Stdout, stdout}, time::Duration};
+use std::{result, io::{Stdout, stdout}, time::Duration};
+use error::CubeError;
 use ratatui::{
     crossterm::{
         event::{self, Event, KeyEventKind}, execute, terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}
@@ -17,7 +19,9 @@ use ratatui::{
 
 type Tui = Terminal<CrosstermBackend<Stdout>>;
 
-pub fn main() -> io::Result<()> {
+type Result<T> = result::Result<T, CubeError>;
+
+pub fn main() -> Result<()> {
     let mut terminal = setup_terminal()?;
 
     let app = App::new();
@@ -28,7 +32,7 @@ pub fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn setup_terminal() -> io::Result<Tui> {
+fn setup_terminal() -> Result<Tui> {
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
 
     enable_raw_mode()?;
@@ -41,14 +45,14 @@ fn setup_terminal() -> io::Result<Tui> {
 }
 
 
-fn run_app(mut app: App, terminal: &mut Tui) -> io::Result<()> {
+fn run_app(mut app: App, terminal: &mut Tui) -> Result<()> {
     while !app.should_quit {
         terminal.draw(|frame| ui::draw(frame, &app))?;
 
         if event::poll(Duration::from_millis(16))? {
             if let Event::Key(event) = event::read()? {
                 if event.kind == KeyEventKind::Press {
-                    app.on_key_pressed(event.code)
+                    app.on_key_pressed(event.code)?
                 }
             }
         }
@@ -56,7 +60,7 @@ fn run_app(mut app: App, terminal: &mut Tui) -> io::Result<()> {
     Ok(())
 }
 
-fn restore_terminal(terminal: &mut Tui) -> io::Result<()> {
+fn restore_terminal(terminal: &mut Tui) -> Result<()> {
     disable_raw_mode()?;
     execute!(stdout(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;

@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{error::Error, fmt, time::Duration};
 
 #[derive(Debug, Clone)]
 pub enum Penalty {
@@ -13,6 +13,28 @@ pub enum SolveError {
     TimeWithDNF,
     // #[error("Time cannot be None unless penalty is DNF")]
     NoTimeWithoutDNF
+}
+
+impl fmt::Display for SolveError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            SolveError::TimeWithDNF => write!(f, "Time must be None when penalty is DNF"),
+            SolveError::NoTimeWithoutDNF => write!(f, "Time cannot be None unless penalty is DNF")
+        }
+    }
+}
+
+impl Error for SolveError {
+    fn cause(&self) -> Option<&dyn Error> {
+        None
+    }
+
+    fn description(&self) -> &str {
+        match *self {
+            Self::TimeWithDNF => "solve time but is DNF",
+            Self::NoTimeWithoutDNF => "missing solve time and is not DNF"
+        }
+    }
 }
 
 #[derive(Debug)]

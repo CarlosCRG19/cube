@@ -2,6 +2,7 @@ use crate::scramble::{Puzzle, Scrambler};
 use crate::session::Session;
 use crate::solve::Solve;
 use crate::timer::{Timer, TimerState};
+use crate::error::CubeError;
 
 use ratatui::crossterm::event::KeyCode;
 
@@ -22,14 +23,16 @@ impl App {
         }
     }
 
-    pub fn on_key_pressed(&mut self, code: KeyCode) {
+    pub fn on_key_pressed(&mut self, code: KeyCode) -> Result<(), CubeError> {
         match code {
             KeyCode::Char(' ') => {
                 match self.timer.state() {
                     TimerState::Running { .. } => {
-                        let current_scramble = self.current_scramble.take().unwrap();
-                        let solve = Solve::build(current_scramble, Some(self.timer.elapsed()), None).unwrap();
                         self.timer.pause();
+
+                        let current_scramble = self.current_scramble.take().unwrap();
+                        let solve = Solve::build(current_scramble, Some(self.timer.elapsed()), None)?;
+
                         self.session.save_solve(solve);
                         self.current_scramble = Some(Scrambler::new_scramble(Puzzle::Cube3x3));
                     }
@@ -42,5 +45,7 @@ impl App {
             KeyCode::Char('q') => self.should_quit = true,
             _ => {}
         }
+
+        Ok(())
     }
 }
