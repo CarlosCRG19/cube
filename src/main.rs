@@ -3,11 +3,13 @@ mod error;
 mod math;
 mod scramble;
 mod session;
+mod storage;
 mod solve;
 mod timer;
 mod ui;
 
 use crate::app::App;
+use crate::storage::FileSystemStorage;
 
 use std::{result, io::{Stdout, stdout}, time::Duration};
 use error::CubeError;
@@ -19,12 +21,15 @@ use ratatui::{
 
 type Tui = Terminal<CrosstermBackend<Stdout>>;
 
+// TODO(09/29/2024): see if it is possible to make this type global, along with `CubeError`
 type Result<T> = result::Result<T, CubeError>;
 
 pub fn main() -> Result<()> {
     let mut terminal = setup_terminal()?;
 
-    let app = App::new();
+    let storage = FileSystemStorage::build()?;
+    let app = App::build(Box::new(storage))?;
+
     run_app(app, &mut terminal)?;
 
     restore_terminal(&mut terminal)?;

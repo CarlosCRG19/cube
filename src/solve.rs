@@ -1,17 +1,15 @@
 use std::{error::Error, fmt, time::Duration};
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Penalty {
     Plus2,
     DNF
 }
 
-// [TODO]: add messages to errors (better error handling)
 #[derive(Debug)]
 pub enum SolveError {
-    // #[error("Time must be None when penalty is DNF")]
     TimeWithDNF,
-    // #[error("Time cannot be None unless penalty is DNF")]
     NoTimeWithoutDNF
 }
 
@@ -37,7 +35,7 @@ impl Error for SolveError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Solve {
     scramble: String,
     time: Option<Duration>,

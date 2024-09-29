@@ -1,5 +1,7 @@
 use crate::solve::Solve;
+use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Session {
     solves: Vec<Solve>,
 }
