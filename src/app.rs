@@ -3,7 +3,7 @@ use crate::session::Session;
 use crate::solve::Solve;
 use crate::storage::Storage;
 use crate::timer::{Timer, TimerState};
-use crate::error::CubeError;
+use crate::Result;
 
 use ratatui::crossterm::event::KeyCode;
 
@@ -16,7 +16,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn build(storage: Box<dyn Storage>) -> Result<App, CubeError> {
+    pub fn build(storage: Box<dyn Storage>) -> Result<App> {
         let session = storage.load_session()?;
 
         Ok(App {
@@ -28,7 +28,7 @@ impl App {
         })
     }
 
-    pub fn on_key_pressed(&mut self, code: KeyCode) -> Result<(), CubeError> {
+    pub fn on_key_pressed(&mut self, code: KeyCode) -> Result<()> {
         match code {
             KeyCode::Char(' ') => {
                 match self.timer.state() {

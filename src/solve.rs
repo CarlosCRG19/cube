@@ -1,5 +1,6 @@
-use std::{error::Error, fmt, time::Duration};
+use std::time::Duration;
 use serde::{Serialize, Deserialize};
+use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Penalty {
@@ -7,32 +8,12 @@ pub enum Penalty {
     DNF
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum SolveError {
+    #[error("Time must be None when penalty is DNF")]
     TimeWithDNF,
+    #[error("Time cannot be None unless penalty is DNF")]
     NoTimeWithoutDNF
-}
-
-impl fmt::Display for SolveError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {
-            SolveError::TimeWithDNF => write!(f, "Time must be None when penalty is DNF"),
-            SolveError::NoTimeWithoutDNF => write!(f, "Time cannot be None unless penalty is DNF")
-        }
-    }
-}
-
-impl Error for SolveError {
-    fn cause(&self) -> Option<&dyn Error> {
-        None
-    }
-
-    fn description(&self) -> &str {
-        match *self {
-            Self::TimeWithDNF => "solve time but is DNF",
-            Self::NoTimeWithoutDNF => "missing solve time and is not DNF"
-        }
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

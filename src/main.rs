@@ -1,5 +1,4 @@
 mod app;
-mod error;
 mod math;
 mod scramble;
 mod session;
@@ -10,19 +9,30 @@ mod ui;
 
 use crate::app::App;
 use crate::storage::FileSystemStorage;
+use crate::solve::SolveError;
 
 use std::{result, io::{Stdout, stdout}, time::Duration};
-use error::CubeError;
 use ratatui::{
     crossterm::{
         event::{self, Event, KeyEventKind}, execute, terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}
     }, prelude::*, Terminal
 };
+use thiserror::Error;
+use std::io;
 
 type Tui = Terminal<CrosstermBackend<Stdout>>;
 
-// TODO(09/29/2024): see if it is possible to make this type global, along with `CubeError`
-type Result<T> = result::Result<T, CubeError>;
+#[derive(Error, Debug)]
+pub enum CubeError {
+    #[error("IO error: {0}")]
+    Io(#[from] io::Error),
+    #[error("Solve error: {0}")]
+    InvalidSolve(#[from] SolveError),
+    #[error("Serialization error: {0}")]
+    Serde(#[from] serde_json::Error)
+}
+
+pub type Result<T> = result::Result<T, CubeError>;
 
 pub fn main() -> Result<()> {
     let mut terminal = setup_terminal()?;

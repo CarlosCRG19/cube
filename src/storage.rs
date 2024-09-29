@@ -1,8 +1,7 @@
-use crate::{error::CubeError, session::Session};
+use crate::session::Session;
+use crate::Result;
 
-use std::{fs, io, path::PathBuf, result};
-
-type Result<T> = result::Result<T, CubeError>;
+use std::{fs, io, path::PathBuf};
 
 pub trait Storage {
     fn save_session(&self, session: &Session) -> Result<()>;
